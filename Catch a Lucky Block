@@ -27,7 +27,7 @@ local Options = {
 }
 
 local CheckFrames = {Check1}
-local OptionNames = {"colletion 900DC"}
+local OptionNames = {"utima area"}
 local YPos = 42
 local menuAberto = true
 
