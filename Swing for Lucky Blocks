@@ -33,25 +33,40 @@ local OptionNames = {"Mitico", "legendario"}
 local YPos = 42
 local menuAberto = true
 
--- CONFIGURAÇÃO DO MENU
+-- ==============================================
+-- CONFIGURAÇÕES DO MENU
+-- ==============================================
+local LARGURA_MENU = 250
+local ALTURA_POR_ITEM = 46
+local ESPACO_BOTAO_SPAW = 50
+local ESPACO_RODAPE = 24
+local ALTURA_MINIMA = 200
+
+-- Cálculo automático da altura
+local CalcularAlturaTotal = function()
+    local qtdItens = #OptionNames
+    local alturaCalculada = YPos + (qtdItens * ALTURA_POR_ITEM) + ESPACO_BOTAO_SPAW + ESPACO_RODAPE + 20
+    return math.max(alturaCalculada, ALTURA_MINIMA)
+end
+
+-- Montagem do menu
 ScreenGui.Name = "MainMenuGui"
 ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
 
--- FUNDO BEM ESCURO
-MainFrame.Size = UDim2.new(0, 250, 0, 200)
+MainFrame.Size = UDim2.new(0, LARGURA_MENU, 0, CalcularAlturaTotal())
 MainFrame.Position = UDim2.new(0.02, 0, 0.05, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-MainFrame.BackgroundTransparency = 0
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BackgroundTransparency = 0.1
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- TITULO
-Title.Size = UDim2.new(1, -45, 0, 28)
-Title.Position = UDim2.new(0, 10, 0, 6)
+-- Título
+Title.Size = UDim2.new(1, -45, 0, 30)
+Title.Position = UDim2.new(0, 10, 0, 7)
 Title.BackgroundTransparency = 1
 Title.Text = NOME_JOGO
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -60,22 +75,22 @@ Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = MainFrame
 
--- BOTÃO ABRIR/FECHAR
-ToggleBtn.Size = UDim2.new(0, 30, 0, 24)
-ToggleBtn.Position = UDim2.new(1, -38, 0, 7)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ToggleBtn.BorderColor3 = Color3.fromRGB(70, 70, 70)
+-- Botão abrir/fechar
+ToggleBtn.Size = UDim2.new(0, 30, 0, 26)
+ToggleBtn.Position = UDim2.new(1, -36, 0, 7)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ToggleBtn.BorderColor3 = Color3.fromRGB(80, 80, 80)
 ToggleBtn.Text = "▼"
 ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.TextScaled = true
 ToggleBtn.Font = Enum.Font.GothamBold
 ToggleBtn.Parent = MainFrame
 
--- OPÇÕES DE TELEPORTE
+-- Cria opções — SEM QUADRADOS APARECENDO
 for i = 1, #OptionNames do
     local opt = Instance.new("TextButton")
     opt.Name = "Option_" .. OptionNames[i]
-    opt.Size = UDim2.new(1, -30, 0, 32)
+    opt.Size = UDim2.new(1, -20, 0, 38)
     opt.Position = UDim2.new(0, 10, 0, YPos)
     opt.BackgroundTransparency = 1
     opt.Text = OptionNames[i]
@@ -85,37 +100,33 @@ for i = 1, #OptionNames do
     opt.TextXAlignment = Enum.TextXAlignment.Left
     opt.Parent = MainFrame
 
-    local cb = CheckFrames[i]
-    cb.Size = UDim2.new(0, 22, 0, 22)
-    cb.Position = UDim2.new(1, -32, 0, 5)
-    cb.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    cb.BorderColor3 = Color3.fromRGB(70, 70, 70)
-    cb.Parent = MainFrame
-
+    -- Ação ao clicar
     opt.MouseButton1Click:Connect(function()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local hrp = char:WaitForChild("HumanoidRootPart")
         
+        -- Volta todas brancas
+        for _, filho in pairs(MainFrame:GetChildren()) do
+            if filho:IsA("TextButton") and filho ~= ToggleBtn and filho ~= SpawBtn then
+                filho.TextColor3 = Color3.fromRGB(255, 255, 255)
+            end
+        end
+        -- Destaca azul
+        opt.TextColor3 = Color3.fromRGB(80, 150, 255)
+
         hrp.CFrame = Options[OptionNames[i]]
         ReplicatedStorage.SpawnEvent:FireServer()
-
-        for _, c in pairs(CheckFrames) do
-            c.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        end
-        cb.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
     end)
 
-    YPos = YPos + 38
+    YPos += ALTURA_POR_ITEM
 end
 
--- ==============================================
--- BOTÃO SPAW - MAIS CLARO QUE O FUNDO
--- ==============================================
+-- Botão voltar ao spawn
 SpawBtn.Size = UDim2.new(1, -15, 0, 38)
-SpawBtn.Position = UDim2.new(0, 8, 0, YPos + 6)
-SpawBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SpawBtn.Position = UDim2.new(0, 8, 0, YPos + 8)
+SpawBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 SpawBtn.BorderSizePixel = 0
-SpawBtn.Text = "spaw"
+SpawBtn.Text = "GO TO SPAW"
 SpawBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpawBtn.TextScaled = true
 SpawBtn.Font = Enum.Font.GothamBold
@@ -125,33 +136,29 @@ SpawBtn.Parent = MainFrame
 SpawBtn.MouseButton1Click:Connect(function()
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
-    
-    hrp.CFrame = Options.spaw
+    hrp.CFrame = Options["spaw"]
     ReplicatedStorage.SpawnEvent:FireServer()
-
-    for _, c in pairs(CheckFrames) do
-        c.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    end
 end)
 
--- RODAPÉ
-Footer.Size = UDim2.new(1, 0, 0, 20)
+-- Rodapé
+Footer.Size = UDim2.new(1, 0, 0, 22)
 Footer.Position = UDim2.new(0, 10, 0, YPos + 52)
 Footer.BackgroundTransparency = 1
-Footer.Text = "YouTube: Luan script"
-Footer.TextColor3 = Color3.fromRGB(170, 170, 170)
+Footer.Text = "by Luan script"
+Footer.TextColor3 = Color3.fromRGB(200, 200, 200)
 Footer.TextScaled = true
 Footer.Font = Enum.Font.Gotham
 Footer.TextXAlignment = Enum.TextXAlignment.Left
 Footer.Parent = MainFrame
 
--- ABRIR / FECHAR
+-- Abrir / fechar menu
 local function AtualizarMenu()
-    MainFrame.Size = menuAberto and UDim2.new(0, 250, 0, 140) or UDim2.new(0, 250, 0, 40)
+    local alturaTotal = CalcularAlturaTotal()
+    MainFrame.Size = menuAberto and UDim2.new(0, LARGURA_MENU, 0, alturaTotal) or UDim2.new(0, LARGURA_MENU, 0, 40)
     ToggleBtn.Text = menuAberto and "▼" or "▶"
     
     for _, v in pairs(MainFrame:GetChildren()) do
-        local visivel = v:IsA("TextButton") or v == Footer or v == SpawBtn
+        local visivel = v:IsA("TextButton") or v == Footer
         v.Visible = menuAberto and visivel or (v == Title or v == ToggleBtn)
     end
 end
@@ -169,5 +176,4 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 AtualizarMenu()
-print("✅ PRONTO! Apenas divino, cosmic e spaw.")
-
+print("✅ Pronto! Código inicial igual pediu, sem quadrados visíveis.")
